@@ -2,10 +2,12 @@
 import logging
 from flask import jsonify, request, Blueprint
 from sqlalchemy.exc import IntegrityError
+from pydantic import ValidationError
 from flasgger.utils import swag_from
 from app.models import Firewall
 from app.extensions import db
 import app.utils.common as common_utils
+from app.utils.schema import NameCheck
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -70,16 +72,20 @@ def create_firewall()->tuple:
     """
     logger.info(f"Creating firewall with data {request.json}")
     data = request.json
-    name = data.get('name')
-    if not name:
-        return jsonify({"error": "Name is required."}), 400
+    # Check name value
+    try:
+        dto = NameCheck.model_validate(data)
 
-    existing = Firewall.query.filter_by(name=name).first()
+    except ValidationError as e:
+        logger.error(f"Validation error: {e}")
+        return jsonify({'error': str(e)}), 400
+
+    existing = Firewall.query.filter_by(name=dto.name).first()
     if existing:
-        logger.warning(f"Firewall with name {name} already exists.")
+        logger.warning(f"Firewall with name {dto.name} already exists.")
         return jsonify({"error": "Firewall with this name already exists."}), 400
 
-    firewall = Firewall(name=data['name'])
+    firewall = Firewall(name=dto.name)
     db.session.add(firewall)
     try:
         db.session.commit()

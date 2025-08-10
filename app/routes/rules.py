@@ -1,9 +1,11 @@
 "This file contains the routes for managing firewall rules in a Flask application"
 from flask import Blueprint, request, jsonify
 from flasgger.utils import swag_from
+from pydantic import ValidationError
 from app.extensions import db
 from app.models import ActionEnum, ProtocolEnum, Rule, Policy
-from app.utils.common import safe_commit, validate_enum, validate_ip, validate_port
+from app.utils.common import safe_commit
+from app.utils.schema import RuleCheck
 
 bp = Blueprint('rules', __name__, url_prefix='/rules')
 
@@ -32,25 +34,19 @@ def create_rule(policy_id: int) -> tuple:
     """
     data = request.json
     policy = Policy.query.get_or_404(policy_id)
-    str_action = data.get('action', '').upper() if data.get('action') else None
-    str_protocol = data.get('protocol', '').upper() if data.get('protocol') else None
 
     try:
-        action = validate_enum(str_action, ActionEnum)
-        protocol = validate_enum(str_protocol, ProtocolEnum)
-        port = validate_port(int(data.get('port')))
-        source_ip = validate_ip(data.get('source_ip'))
-        destination_ip = validate_ip(data.get('destination_ip'))
+        dto = RuleCheck.model_validate(data)
 
-    except ValueError as e:
+    except ValidationError as e:
         return jsonify({'error': str(e)}), 400
 
     rule = Rule(
-        action=action,
-        protocol=protocol,
-        source_ip=source_ip,
-        destination_ip=destination_ip,
-        port=port,
+        action=ActionEnum(dto.action.value),
+        protocol=ProtocolEnum(dto.protocol.value),
+        source_ip=str(dto.source_ip),
+        destination_ip=str(dto.destination_ip),
+        port=dto.port,
         policy=policy
     )
     db.session.add(rule)

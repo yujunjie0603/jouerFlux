@@ -1,10 +1,12 @@
 """Manage firewall policies and routes for the JouerFlux application."""
 import logging
 from flask import Blueprint, request, jsonify
+from pydantic import ValidationError
 from flasgger.utils import swag_from
 from app.extensions import db
 from app.models import Policy
 from app.utils.common import paginate_query, safe_commit
+from app.utils.schema import NameCheck
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -69,15 +71,19 @@ def create_policy() -> tuple:
         tuple: A tuple containing the JSON response and the HTTP status code.
     """
     data = request.json
-    name=data['name']
-    if not name:
-        return jsonify({"error": "Name is required."}), 400
+    # Check name value
+    try:
+        dto = NameCheck.model_validate(data)
 
-    existing = Policy.query.filter_by(name=name).first()
+    except ValidationError as e:
+        logger.error(f"Validation error: {e}")
+        return jsonify({'error': str(e)}), 400
+
+    existing = Policy.query.filter_by(name=dto.name).first()
     if existing:
         return jsonify({"error": "Policy with this name already exists."}), 400
 
-    policy = Policy(name=name)
+    policy = Policy(name=dto.name)
     db.session.add(policy)
 
     if not safe_commit(db.session):

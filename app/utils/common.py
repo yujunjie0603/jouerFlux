@@ -43,38 +43,7 @@ def validate_enum(value, enum_class):
     except ValueError:
         raise ValueError(f"Invalid value '{value}'. Valid values are: {[e.value for e in enum_class]}")
 
-def validate_ip(ip_str):
-    """Validate if a string is a valid IP address.
 
-    Args:
-        ip_str (str): The IP address string to validate.
-
-    Returns:
-        str: The validated IP address.
-
-    Raises:
-        ValueError: If the string is not a valid IP address.
-    """
-    try:
-        return str(ipaddress.ip_address(ip_str))
-    except ValueError as e:
-        raise ValueError(f"Invalid IP address '{ip_str}': {str(e)}")
-
-def validate_port(port):
-    """Validate if a port number is within the valid range.
-
-    Args:
-        port (int): The port number to validate.
-
-    Returns:
-        int: The validated port number.
-
-    Raises:
-        ValueError: If the port number is not between 0 and 65535.
-    """
-    if not isinstance(port, int) or not (0 <= port <= 65535):
-        raise ValueError("Port must be an integer between 0 and 65535")
-    return port
 
 def safe_commit(session):
     """Safely commit a session, rolling back on failure.
