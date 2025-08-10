@@ -5,60 +5,7 @@ from flasgger import Swagger
 from flasgger.utils import swag_from
 from flask_cors import CORS
 from app.extensions import db, migrate
-template = {
-        "swagger": "2.0",
-        "info": {
-            "title": "JouerFlux API",
-            "version": "1.0.0",
-            "description": "Firewall management endpoints"
-        },
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "definitions": {
-            "Firewall": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "integer"},
-                    "name": {"type": "string"}
-                }
-            },
-            "FirewallWithPolicies": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "integer"},
-                    "name": {"type": "string"},
-                    "policies": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id":   {"type": "integer"},
-                                "name": {"type": "string"}
-                            }
-                        }
-                    }
-                }
-            },
-            "Policy": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "integer"},
-                    "name": {"type": "string"},
-                }
-            },
-            "Rule": {
-                "type": "object",
-                "properties": {
-                    "id":   {"type": "integer"},
-                    "action": {"type": "string"},
-                    "source_ip": {"type": "string"},
-                    "destination_ip": {"type": "string"},
-                    "protocol": {"type": "string"},
-                    "port": {"type": "integer"}
-                }
-            }
-        }
-    }
+from app.swagger_config import template_swagger
 
 def create_app():
     """Create and configure the Flask application."""
@@ -73,7 +20,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
-    Swagger(app, template=template)
+    Swagger(app, template=template_swagger)
     CORS(app)
 
     from .routes import firewalls, policies, rules, firewall_policy
@@ -85,6 +32,7 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    # Redirect root URL to Swagger UI
     @app.route('/')
     def index():
         return redirect('/apidocs')
