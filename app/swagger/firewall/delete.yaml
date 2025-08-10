@@ -1,0 +1,19 @@
+tags:
+  - Firewalls
+summary: "Delete a firewall by ID"
+parameters:
+  - in: path
+    name: firewall_id
+    type: integer
+    required: true
+    description: "Firewall ID"
+responses:
+  200:
+    description: "Deleted"
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+  404:
+    description: "Not Found"

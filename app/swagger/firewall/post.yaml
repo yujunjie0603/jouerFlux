@@ -1,0 +1,23 @@
+tags:
+  - Firewalls
+summary: "Create a new firewall"
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+responses:
+  201:
+    description: "Created"
+    schema:
+      $ref: "#/definitions/Firewall"
+  400:
+    description: "Missing name or already exists"
+  500:
+    description: "Internal server error"

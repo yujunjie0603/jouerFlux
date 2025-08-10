@@ -1,0 +1,19 @@
+tags:
+  - Policies
+summary: "Create a new policy"
+parameters:
+  - in: body
+    name: policy
+    required: true
+    schema:
+      $ref: "#/definitions/Policy"
+responses:
+  201:
+    description: "Policy created"
+    schema:
+      $ref: "#/definitions/Policy"
+  400:
+    description: "Bad Request"
+#without id
+  500:
+    description: "Internal Server Error"

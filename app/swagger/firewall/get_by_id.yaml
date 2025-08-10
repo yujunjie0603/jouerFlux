@@ -1,0 +1,16 @@
+tags:
+  - Firewalls
+summary: "Get a firewall by ID"
+parameters:
+  - in: path
+    name: firewall_id
+    type: integer
+    required: true
+    description: "Firewall ID"
+responses:
+  200:
+    description: "Firewall details"
+    schema:
+      $ref: "#/definitions/FirewallWithPolicies"
+  404:
+    description: "Not Found"

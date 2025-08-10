@@ -1,0 +1,23 @@
+tags:
+  - Rules
+summary: "Create a new rule for a specific policy"
+parameters:
+  - in: path
+    name: policy_id
+    type: integer
+    required: true
+    description: "The ID of the policy to create a rule for"
+  - in: body
+    name: rule
+    required: true
+    schema:
+      $ref: "#/definitions/Rule"
+responses:
+  201:
+    description: "Created"
+    schema:
+      $ref: "#/definitions/Rule"
+  400:
+    description: "Bad Request"
+  404:
+    description: "Not Found"

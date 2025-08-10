@@ -1,0 +1,14 @@
+tags:
+  - Policies
+summary: "Delete a policy by ID"
+parameters:
+  - in: path
+    name: policy_id
+    type: integer
+    required: true
+    description: "The ID of the policy to delete"
+responses:
+  204:
+    description: "No Content"
+  404:
+    description: "Not Found"

@@ -1,0 +1,50 @@
+tags:
+  - Firewall Policy
+summary: Remove a policy from a firewall
+description: Disassociates an existing Policy from a Firewall.
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - in: path
+    name: firewall_id
+    required: true
+    type: integer
+    description: ID of the firewall
+  - in: path
+    name: policy_id
+    required: true
+    type: integer
+    description: ID of the policy to remove
+responses:
+  200:
+    description: Policy removed successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+    examples:
+      application/json:
+        message: Policy removed from firewall
+  400:
+    description: Bad request (e.g., policy not associated)
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+    examples:
+      application/json:
+        message: Policy not associated with firewall
+  404:
+    description: Firewall or Policy not found
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+    examples:
+      application/json:
+        message: Firewall or Policy not found

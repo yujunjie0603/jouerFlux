@@ -1,0 +1,18 @@
+tags:
+  - Rules
+summary: "Get all rules for a specific policy"
+parameters:
+  - in: path
+    name: policy_id
+    type: integer
+    required: true
+    description: "The ID of the policy to retrieve rules for"
+responses:
+  200:
+    description: "A list of rules for the specified policy"
+    schema:
+      type: array
+      items:
+        $ref: "#/definitions/Rule"
+  404:
+    description: "Not Found"

@@ -1,0 +1,42 @@
+tags:
+  - Firewall Policy
+summary: Add a policy to a firewall
+description: Associates an existing Policy with a Firewall.
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - in: path
+    name: firewall_id
+    required: true
+    type: integer
+    description: ID of the firewall
+  - in: path
+    name: policy_id
+    required: true
+    type: integer
+    description: ID of the policy to add
+responses:
+  200:
+    description: Policy added successfully
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+    examples:
+      application/json:
+        message: Policy added to firewall
+  400:
+    description: Bad request (e.g., policy already associated)
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+    examples:
+      application/json:
+        message: Policy already associated with firewall
+  404:
+    description: Firewall or Policy not found

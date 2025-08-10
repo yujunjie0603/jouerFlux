@@ -1,0 +1,16 @@
+tags:
+  - Policies
+summary: "Get a policy by ID"
+parameters:
+  - in: path
+    name: policy_id
+    type: integer
+    required: true
+    description: "The ID of the policy to retrieve"
+responses:
+  200:
+    description: "A policy object"
+    schema:
+      $ref: "#/definitions/Policy"
+  404:
+    description: "Not Found"

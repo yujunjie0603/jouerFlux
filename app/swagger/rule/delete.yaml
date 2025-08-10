@@ -1,0 +1,14 @@
+tags:
+  - Rules
+summary: "Delete a rule by ID"
+parameters:
+  - in: path
+    name: rule_id
+    type: integer
+    required: true
+    description: "The ID of the rule to delete"
+responses:
+  204:
+    description: "No Content"
+  404:
+    description: "Not Found"
