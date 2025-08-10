@@ -107,4 +107,4 @@ def delete_policy(policy_id: int) -> tuple:
     if not safe_commit(db.session):
         return jsonify({'error': 'Failed to delete policy'}), 500
 
-    return '', 204
+    return "", 204

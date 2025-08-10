@@ -8,12 +8,7 @@ parameters:
     required: true
     description: "Firewall ID"
 responses:
-  200:
-    description: "Deleted"
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
+  204:
+    description: "No Content"
   404:
     description: "Not Found"

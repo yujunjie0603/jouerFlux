@@ -112,4 +112,4 @@ def delete_firewall(firewall_id: int) -> tuple:
     db.session.delete(firewall)
     db.session.commit()
 
-    return f'Firewall {firewall.name} ({firewall.id}) deleted', 200
+    return "", 204

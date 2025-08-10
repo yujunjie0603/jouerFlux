@@ -50,10 +50,9 @@ template = {
                 "type": "object",
                 "properties": {
                     "id":   {"type": "integer"},
-                    "name": {"type": "string"},
                     "action": {"type": "string"},
-                    "source": {"type": "string"},
-                    "destination": {"type": "string"},
+                    "source_ip": {"type": "string"},
+                    "destination_ip": {"type": "string"},
                     "protocol": {"type": "string"},
                     "port": {"type": "integer"}
                 }

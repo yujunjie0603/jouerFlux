@@ -18,16 +18,8 @@ parameters:
     type: integer
     description: ID of the policy to remove
 responses:
-  200:
-    description: Policy removed successfully
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-    examples:
-      application/json:
-        message: Policy removed from firewall
+  204:
+    description: No Content
   400:
     description: Bad request (e.g., policy not associated)
     schema:

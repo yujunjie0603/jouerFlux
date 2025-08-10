@@ -69,4 +69,4 @@ def delete_rule(rule_id: int) -> tuple:
     db.session.delete(rule)
     if not safe_commit(db.session):
         return jsonify({'error': 'Failed to delete rule'}), 500
-    return '', 204
+    return "", 204

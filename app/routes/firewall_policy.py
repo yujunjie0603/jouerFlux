@@ -53,7 +53,7 @@ def remove_policy_from_firewall(firewall_id: int, policy_id: int) -> tuple:
 
     firewall.policies.remove(policy)
     db.session.commit()
-    return jsonify({'message': 'Policy removed from firewall'}), 200
+    return "", 204
 
 @swag_from('/app/swagger/firewall_policy/get_by_firewall.yaml', methods=['get'])
 @bp.route('/<int:firewall_id>/policies', methods=['GET'])

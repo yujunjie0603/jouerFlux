@@ -12,6 +12,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Rule"
+    description: |
+      The rule object to create.
+      Rule payload.
+      - `action`: ALLOW | DENY
+      - `protocol`: TCP | UDP | ICMP | GRE | ESP | AH | ALL
+      - `source_ip` / `destination_ip`: IPv4 or IPv6
+      - `source_port` : 0–65535; required only for TCP/UDP, must be null for other protocols
 responses:
   201:
     description: "Created"
