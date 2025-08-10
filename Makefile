@@ -1,5 +1,17 @@
 .PHONY: show_log build up test down db_init db_migrate db_upgrade db_downgrade
 
+help:
+	@echo "Available commands:"
+	@echo "  make show_log       - Show logs for the jouerflux service"
+	@echo "  make build          - Build the Docker images"
+	@echo "  make up             - Start the Docker containers in detached mode"
+	@echo "  make test           - Run tests using pytest"
+	@echo "  make down           - Stop and remove the Docker containers"
+	@echo "  make db_init        - Initialize the database"
+	@echo "  make db_migrate     - Create a new database migration"
+	@echo "  make db_upgrade     - Apply the latest database migrations"
+	@echo "  make db_downgrade   - Revert the last database migration"
+
 show_log:
 	docker compose logs -f jouerflux
 
