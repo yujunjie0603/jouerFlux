@@ -40,10 +40,26 @@ template_swagger = {
                     "name": {"type": "string"},
                 }
             },
+            "PolicyInput": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                }
+            },
             "Rule": {
                 "type": "object",
                 "properties": {
                     "id":   {"type": "integer"},
+                    "action": {"type": "string"},
+                    "source_ip": {"type": "string"},
+                    "destination_ip": {"type": "string"},
+                    "protocol": {"type": "string"},
+                    "port": {"type": "integer"}
+                }
+            },
+            "RuleInput": {
+                "type": "object",
+                "properties": {
                     "action": {"type": "string"},
                     "source_ip": {"type": "string"},
                     "destination_ip": {"type": "string"},

@@ -6,7 +6,7 @@ parameters:
     name: policy
     required: true
     schema:
-      $ref: "#/definitions/Policy"
+      $ref: "#/definitions/PolicyInput"
 responses:
   201:
     description: "Policy created"

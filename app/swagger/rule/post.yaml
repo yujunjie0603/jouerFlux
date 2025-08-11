@@ -11,7 +11,7 @@ parameters:
     name: rule
     required: true
     schema:
-      $ref: "#/definitions/Rule"
+      $ref: "#/definitions/RuleInput"
     description: |
       The rule object to create.
       Rule payload.
