@@ -40,3 +40,27 @@ Commandes Makefile utiles:
 | `make db_upgrade`   | Applique les migrations                  |
 | `make db_downgrade` | Annule la dernière migration             |
 
+
+Les API
+
+# firewall
+    - `GET /firewalls` : Récupère la liste de tous les firewalls
+    - `POST /firewalls` : Crée un nouveau firewall
+    - `GET /firewalls/<firewall_id>` : Récupère les détails d'un firewall spécifique
+    - `DELETE /firewalls/<firewall_id>` : Supprime un firewall
+
+# policy
+    - `GET /policies` : Récupère la liste de toutes les politiques
+    - `POST /policies` : Crée une nouvelle politique
+    - `GET /policies/<policy_id>` : Récupère les détails d'une politique spécifique
+    - `DELETE /policies/<policy_id>` : Supprime une politique
+
+# rules
+    - `GET /rules/policy/<policy_id>` : Récupère la liste de toutes les règles d'une politique spécifique
+    - `POST /rules/policy/<policy_id>` : Crée une nouvelle règle pour une politique spécifique
+    - `DELETE /rules/<rule_id>` : Supprime une règle
+
+# firewall policy
+    - `GET /api/firewall-policy/<firewall_id>/policies` : Récupère la liste des politiques d'un firewall spécifique
+    - `POST /api/firewall-policy/<firewall_id>/policies` : Crée une nouvelle politique pour un firewall spécifique
+    - `DELETE /api/firewall-policy/<firewall_id>/policies/<policy_id>` : Supprime une politique spécifique d'un firewall
