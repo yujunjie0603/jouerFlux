@@ -41,7 +41,7 @@ Commandes Makefile utiles:
 | `make db_downgrade` | Annule la dernière migration             |
 
 
-Les API
+# Les API
 
 # firewall
     - `GET /firewalls` : Récupère la liste de tous les firewalls
