@@ -5,7 +5,6 @@ help:
 	@echo "  make show_log       - Show logs for the jouerflux service"
 	@echo "  make build          - Build the Docker images"
 	@echo "  make up             - Start the Docker containers in detached mode"
-	@echo "  make test           - Run tests using pytest"
 	@echo "  make down           - Stop and remove the Docker containers"
 	@echo "  make db_init        - Initialize the database"
 	@echo "  make db_migrate     - Create a new database migration"
@@ -35,4 +34,3 @@ db_upgrade:
 
 db_downgrade:
 	docker compose run  jouerflux flask db downgrade
-
