@@ -24,13 +24,13 @@ down:
 	docker compose down
 
 db_init:
-	docker compose run  jouerflux flask db init
+	docker compose exec jouerflux flask db init
 
 db_migrate:
-	docker compose run  jouerflux flask db migrate
+	docker compose exec jouerflux flask db migrate
 
 db_upgrade:
-	docker compose run  jouerflux flask db upgrade
+	docker compose exec jouerflux flask db upgrade
 
 db_downgrade:
-	docker compose run  jouerflux flask db downgrade
+	docker compose exec jouerflux flask db downgrade
