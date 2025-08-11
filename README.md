@@ -34,7 +34,7 @@ Commandes Makefile utiles:
 | `make up`           | Lance l'application avec Docker Compose  |
 | `make down`         | Arrête et supprime les conteneurs        |
 | `make build`        | Reconstruit l'image Docker               |
-| `make logs`         | Affiche les logs                         |
+| `make show_log`     | Affiche les logs                         |
 | `make db_init`      | Initialise la base de données            |
 | `make db_migrate`   | Crée une migration de la base de données |
 | `make db_upgrade`   | Applique les migrations                  |

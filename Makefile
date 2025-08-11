@@ -21,9 +21,6 @@ build:
 up:
 	docker compose up -d
 
-test:
-	docker compose run  jouerflux pytest
-
 down:
 	docker compose down
 
