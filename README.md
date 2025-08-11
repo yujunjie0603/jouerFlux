@@ -3,13 +3,13 @@
 JouerFlux est une application Flask permettant de gérer des firewalls, leurs politiques de filtrage et les règles associées.
 Elle expose une API REST documentée avec Swagger, utilise SQLite comme base de données, et est entièrement conteneurisée avec Docker Compose pour un déploiement simple.
 
-Prérequis
+# Prérequis
 
 Avant de commencer, assurez-vous d’avoir installé :
 - Docker
 - Docker Compose
 
-Installation
+# Installation
 
 1. Clonez le dépôt :
     - git clone https://github.com/yujunjie0603/jouerFlux.git
@@ -27,7 +27,7 @@ Installation
     - Ouvrez votre navigateur et allez à l'adresse suivante : http://localhost:5000
     - Swagger UI sera disponible à l'adresse suivante : http://localhost:5000/apidocs
 
-Commandes Makefile utiles:
+# Commandes Makefile utiles:
 
 | Commande            | Description                              |
 | ------------------- | ---------------------------------------- |
@@ -43,24 +43,24 @@ Commandes Makefile utiles:
 
 # Les API
 
-# firewall
+## firewall
     - `GET /firewalls` : Récupère la liste de tous les firewalls
     - `POST /firewalls` : Crée un nouveau firewall
     - `GET /firewalls/<firewall_id>` : Récupère les détails d'un firewall spécifique
     - `DELETE /firewalls/<firewall_id>` : Supprime un firewall
 
-# policy
+## policy
     - `GET /policies` : Récupère la liste de toutes les politiques
     - `POST /policies` : Crée une nouvelle politique
     - `GET /policies/<policy_id>` : Récupère les détails d'une politique spécifique
     - `DELETE /policies/<policy_id>` : Supprime une politique
 
-# rules
+## rules
     - `GET /rules/policy/<policy_id>` : Récupère la liste de toutes les règles d'une politique spécifique
     - `POST /rules/policy/<policy_id>` : Crée une nouvelle règle pour une politique spécifique
     - `DELETE /rules/<rule_id>` : Supprime une règle
 
-# firewall policy
-    - `GET /api/firewall-policy/<firewall_id>/policies` : Récupère la liste des politiques d'un firewall spécifique
-    - `POST /api/firewall-policy/<firewall_id>/policies` : Crée une nouvelle politique pour un firewall spécifique
-    - `DELETE /api/firewall-policy/<firewall_id>/policies/<policy_id>` : Supprime une politique spécifique d'un firewall
+## firewall policy
+    - `GET /firewall-policy/<firewall_id>/policies` : Récupère la liste des politiques d'un firewall spécifique
+    - `POST /firewall-policy/<firewall_id>/policies` : Crée une nouvelle politique pour un firewall spécifique
+    - `DELETE /firewall-policy/<firewall_id>/policies/<policy_id>` : Supprime une politique spécifique d'un firewall
