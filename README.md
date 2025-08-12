@@ -77,6 +77,7 @@ Avant de commencer, assurez-vous d’avoir installé :
             - policy_id
     - `POST /rules/policy/<policy_id>` : Crée une nouvelle règle pour une politique spécifique
         parametres:
+            - policy_id
             - action: ALLOW | DENY
             - protocol: TCP | UDP | ICMP | GRE | ESP | AH | ALL
             - source_ip : ipv4 | ipv6
