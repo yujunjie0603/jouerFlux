@@ -45,19 +45,43 @@ Avant de commencer, assurez-vous d’avoir installé :
 
 ## firewall
     - `GET /firewalls` : Récupère la liste de tous les firewalls
+        parametres:
+            - name : le nom du firewall
+            - page : le numéro de page
+            - per_page : la limite de la page
     - `POST /firewalls` : Crée un nouveau firewall
+    parametres:
+        - name
     - `GET /firewalls/<firewall_id>` : Récupère les détails d'un firewall spécifique
+    parametres:
+        - firewall_id
     - `DELETE /firewalls/<firewall_id>` : Supprime un firewall
 
 ## policy
     - `GET /policies` : Récupère la liste de toutes les politiques
+        parametres:
+            - name : le nom du policy
+            - page : le numéro de page
+            - per_page : la limite de la page
     - `POST /policies` : Crée une nouvelle politique
+        parametres:
+            - name
     - `GET /policies/<policy_id>` : Récupère les détails d'une politique spécifique
+        parametres:
+            - policy_id
     - `DELETE /policies/<policy_id>` : Supprime une politique
 
 ## rules
     - `GET /rules/policy/<policy_id>` : Récupère la liste de toutes les règles d'une politique spécifique
+        parametres:
+            - policy_id
     - `POST /rules/policy/<policy_id>` : Crée une nouvelle règle pour une politique spécifique
+        parametres:
+            - action: ALLOW | DENY
+            - protocol: TCP | UDP | ICMP | GRE | ESP | AH | ALL
+            - source_ip : ipv4 | ipv6
+            - destination_ip : ipv4 | ipv6
+            - port : int | None (quand le protocol est TCT/UDP, il faut avoir un port, sinon, le port doit etre absent)
     - `DELETE /rules/<rule_id>` : Supprime une règle
 
 ## firewall policy
