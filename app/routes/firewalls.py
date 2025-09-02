@@ -1,115 +1,93 @@
 "This module provides routes for managing firewalls in the JouerFlux application."
 import logging
 from flask import jsonify, request, Blueprint
+from flask_restx import Resource, Namespace, fields
 from sqlalchemy.exc import IntegrityError
 from pydantic import ValidationError
 from flasgger.utils import swag_from
 from app.models import Firewall
 from app.extensions import db
 import app.utils.common as common_utils
-from app.utils.schema import NameCheck
+import app.schemas.firewall as firewall_schema
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-bp = Blueprint('firewalls', __name__, url_prefix='/firewalls')
+ns = Namespace('firewalls', description='Firewall operations')
 
-@swag_from('/app/swagger/firewall/get_list.yaml', methods=['get'])
-@bp.route('/', methods=['GET'])
-def list_firewalls()-> tuple:
-    """List all firewalls.
+def to_out(row: firewall_schema.FirewallOut) -> dict:
+    """Convert a Firewall model instance to a dictionary using Pydantic schema."""
+    if not row:
+        return {}
+    return firewall_schema.FirewallOut.model_validate(row).model_dump()
 
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    logger.info("Fetching all firewalls")
-    try :
-        page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=10, type=int)
-    except ValueError as e:
-        logger.error(f"Invalid pagination parameters: {e}")
-        return jsonify({'error': 'Invalid pagination parameters'}), 400
-    filters = []
-    name = request.args.get('name', default=None, type=str)
-    if name:
-        filters.append(Firewall.name.ilike(f"%{name}%"))
-    paginated = common_utils.paginate_query(Firewall, filters=filters, page=page, per_page=per_page)
-    results = [{'id': fw.id, 'name': fw.name} for fw in paginated.items]
-    return jsonify({
+InSchema  = ns.schema_model("FirewallIn", firewall_schema.FirewallIn.model_json_schema())
+OutSchema = ns.schema_model("FirewallOut",    firewall_schema.FirewallOut.model_json_schema())
+
+MAX_PER_PAGE = 100
+@ns.route('/')
+class FirewallList(Resource):
+    """Endpoint for listing and creating firewalls."""
+
+    @ns.param("page", "page (>=1), default 1", _in='query', type='integer')
+    def get(self):
+        """List all firewalls."""
+
+        try:
+            page = request.args.get('page', default=1, type=int)
+            per_page = request.args.get('per_page', default=25, type=int)
+        except ValueError as e:
+            logger.error(f"Invalid pagination parameters: {e}")
+            return {'error': 'Invalid pagination parameters'}, 400
+
+        filters = []
+        if 'name' in request.args:
+            name = request.args.get("name")
+            filters.append(Firewall.name.ilike(f"%{name}%"))
+
+        paginated = common_utils.paginate_query(Firewall, filters=filters, page=page, per_page=per_page)
+        results = [to_out(row) for row in paginated.items]
+        return {
             'total': paginated.total,
             'pages': paginated.pages,
             'page': page,
             'per_page': per_page,
             'results': results
-        }), 200
+        }, 200
 
-@swag_from('/app/swagger/firewall/get_by_id.yaml', methods=['get'])
-@bp.route('/<int:firewall_id>', methods=['GET'])
-def get_firewall(firewall_id: int) -> tuple:
-    """Get a specific firewall by ID.
-    Args:
-        firewall_id (int): The ID of the firewall.
+    @ns.expect(InSchema)
+    def post(self):
+        """Create a new firewall."""
+        data = request.json
+        try:
+            dto = firewall_schema.FirewallIn.model_validate(data)
+        except ValidationError as e:
+            return {'error': str(e)}, 400
 
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    logger.info(f"Fetching firewall with ID: {firewall_id}")
-    firewall = Firewall.query.get_or_404(firewall_id)
-    return jsonify({
-        'id': firewall.id,
-        'name': firewall.name,
-        'policies': [{'id': p.id, 'name': p.name} for p in firewall.policies]
-    }), 200
+        firewall = Firewall(name=dto.name)
+        db.session.add(firewall)
+
+        if not common_utils.safe_commit(db.session):
+            return {'error': 'Failed to create firewall'}, 500
 
 
-@swag_from('/app/swagger/firewall/post.yaml', methods=['post'])
-@bp.route('', methods=['POST'])
-def create_firewall()->tuple:
-    """Create a new firewall.
+        return to_out(firewall), 201
 
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    logger.info(f"Creating firewall with data {request.json}")
-    data = request.json
-    # Check name value
-    try:
-        dto = NameCheck.model_validate(data)
+@ns.route('/<int:firewall_id>')
+class FirewallDetail(Resource):
+    """Endpoint for retrieving, updating, and deleting a specific firewall."""
 
-    except ValidationError as e:
-        logger.error(f"Validation error: {e}")
-        return jsonify({'error': str(e)}), 400
+    def get(self, firewall_id: int):
+        """Get a specific firewall by ID."""
+        firewall = Firewall.query.get_or_404(firewall_id)
+        return to_out(firewall), 200
 
-    existing = Firewall.query.filter_by(name=dto.name).first()
-    if existing:
-        logger.warning(f"Firewall with name {dto.name} already exists.")
-        return jsonify({"error": "Firewall with this name already exists."}), 400
+    def delete(self, firewall_id: int):
+        """Delete a specific firewall by ID."""
+        firewall = Firewall.query.get_or_404(firewall_id)
+        db.session.delete(firewall)
 
-    firewall = Firewall(name=dto.name)
-    db.session.add(firewall)
-    try:
-        db.session.commit()
-    except IntegrityError as e:
-        db.session.rollback()
-        logger.error(f"Error creating firewall: {e}")
-        return jsonify({"error": "Failed to create firewall. This name is already taken."}), 500
+        if not common_utils.safe_commit(db.session):
+            return {'error': 'Failed to delete firewall'}, 500
 
-    return jsonify({'id': firewall.id, 'name': firewall.name}), 201
-
-
-@swag_from('/app/swagger/firewall/delete.yaml', methods=['delete'])
-@bp.route('/<int:firewall_id>', methods=['DELETE'])
-def delete_firewall(firewall_id: int) -> tuple:
-    """Delete a firewall by ID.
-
-    Args:
-        id (int): The ID of the firewall to delete.
-
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    firewall = Firewall.query.get_or_404(firewall_id)
-    db.session.delete(firewall)
-    db.session.commit()
-
-    return "", 204
+        return "", 204

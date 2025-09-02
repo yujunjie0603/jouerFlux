@@ -1,6 +1,6 @@
 "This file contains the models for the firewall application"
 from app.extensions import db
-from app.utils.schema import ActionEnum, ProtocolEnum
+from app.schemas.rule import ActionEnum, ProtocolEnum
 
 firewall_policy = db.Table(
     'firewall_policy',

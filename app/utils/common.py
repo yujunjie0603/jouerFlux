@@ -25,6 +25,27 @@ def paginate_query(model, filters=None, page=1, per_page=10):
 
     return query.paginate(page=page, per_page=per_page, error_out=False)
 
+def paginate_to_dict(paginated, results=None):
+    """Convert a paginated result to a dictionary.
+
+    Args:
+        paginated (Pagination): The paginated result from SQLAlchemy.
+
+    Returns:
+        dict: A dictionary representation of the paginated result.
+    """
+
+    if not results:
+        results = [item.to_dict() for item in paginated.items]
+
+    return {
+        'total': paginated.total,
+        'pages': paginated.pages,
+        'page': paginated.page,
+        'per_page': paginated.per_page,
+        'results': results
+    }
+
 def validate_enum(value, enum_class):
     """Validate if a value is a valid member of an Enum class.
 

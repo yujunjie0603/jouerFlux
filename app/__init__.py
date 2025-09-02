@@ -4,9 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from flask_cors import CORS
-from app.extensions import db, migrate
-from app.swagger_config import template_swagger
-from app.config import Config 
+from app.extensions import db, migrate, api
+from app.config import Config
+from .routes import firewalls, policies, rules, firewall_policy
 
 def create_app():
     """Create and configure the Flask application."""
@@ -15,21 +15,19 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
-    Swagger(app, template=template_swagger)
+    api.init_app(app)
     CORS(app)
 
-    from .routes import firewalls, policies, rules, firewall_policy
-    app.register_blueprint(firewalls.bp)
-    app.register_blueprint(policies.bp)
-    app.register_blueprint(rules.bp)
-    app.register_blueprint(firewall_policy.bp)
+    api.add_namespace(firewalls.ns, path='/firewalls')
+    api.add_namespace(policies.ns, path='/policies')
+    api.add_namespace(rules.ns, path='/rules')
+    api.add_namespace(firewall_policy.ns, path='/firewall_policys')
+    app.url_map.strict_slashes = False
 
-    with app.app_context():
-        db.create_all()
 
     # Redirect root URL to Swagger UI
     @app.route('/')
     def index():
-        return redirect('/apidocs')
+        return redirect('/api/docs')
 
     return app

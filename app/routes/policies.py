@@ -1,110 +1,108 @@
 """Manage firewall policies and routes for the JouerFlux application."""
 import logging
 from flask import Blueprint, request, jsonify
+from flask_restx import Namespace, Resource, fields
 from pydantic import ValidationError
 from flasgger.utils import swag_from
 from app.extensions import db
 from app.models import Policy
-from app.utils.common import paginate_query, safe_commit
-from app.utils.schema import NameCheck
+from app.utils.common import paginate_query, safe_commit, paginate_to_dict
+from app.schemas.policy import PolicyIn, PolicyOut
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-bp = Blueprint('policies', __name__, url_prefix='/policies')
+ns = Namespace('policies', description='Policy operations')
 
-@swag_from('/app/swagger/policy/get_list.yaml', methods=['get'])
-@bp.route('/', methods=['GET'])
-def list_all_policies()-> tuple:
-    """List all firewall policies.
+def to_out(policy: PolicyOut) -> dict:
+    """Convert a Policy model instance to a dictionary using Pydantic schema."""
+    if not policy:
+        return {}
+    return PolicyOut.model_validate(policy).model_dump()
 
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    try :
-        page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=25, type=int)
-    except ValueError as e:
-        logger.error(f"Invalid pagination parameters: {e}")
-        return jsonify({'error': 'Invalid pagination parameters'}), 400
-    filters = []
-    name = request.args.get('name', default=None, type=str)
-    if name:
-        filters.append(Policy.name.ilike(f"%{name}%"))
+InSchema  = ns.schema_model("PolicyIn",  PolicyIn.model_json_schema())
 
-    paginated = paginate_query(Policy, filters=filters, page=page, per_page=per_page)
-    results = [{'id': fw.id,
-                'name': fw.name, 
-                'rules': [r.to_dict() 
-                          for r in fw.rules]}
-               for fw in paginated.items]
+parser_get_list = ns.parser()
+parser_get_list.add_argument("page", type=int, required=False, default=1, help="Page number (>=1)")
+parser_get_list.add_argument("per_page", type=int, required=False, default=1, help="Number of items per page")
+parser_get_list.add_argument("name", type=str, required=False, help="Name of the policy")
 
-    return jsonify({
-        'total': paginated.total,
-        'pages': paginated.pages,
-        'page': page,
-        'per_page': per_page,
-        'results': results
-    }), 200
+@ns.route('/')
+class PolicyList(Resource):
+    """Manage policies.
 
-@swag_from('/app/swagger/policy/get_by_id.yaml', methods=['get'])
-@bp.route('/<int:policy_id>', methods=['GET'])
-def list_policies(policy_id: int) -> tuple:
-    """List a specific policy by ID.
     Args:
-        policy_id (int): The ID of the policy to retrieve.
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
+        Resource (flask_restx.Resource): The base resource class.
     """
-    policies = Policy.query.get_or_404(policy_id)
-    return jsonify({
-        'id': policies.id,
-        'name': policies.name,
-        'rules': [r.to_dict() for r in policies.rules]
-    })
+    @ns.expect(parser_get_list)
+    def get(self):
+        """Get a list of all policies."""
+        args = parser_get_list.parse_args()
+        page = args.get("page", 1)
+        per_page = args.get("per_page", 1)
+        name = args.get("name")
 
-@swag_from('/app/swagger/policy/post.yaml', methods=['post'])
-@bp.route('/', methods=['POST'])
-def create_policy() -> tuple:
-    """Create a new firewall policy.
-    Returns:
-        tuple: A tuple containing the JSON response and the HTTP status code.
-    """
-    data = request.json
-    # Check name value
-    try:
-        dto = NameCheck.model_validate(data)
+        filters = []
+        if name:
+            filters.append(Policy.name.ilike(f"%{name}%"))
 
-    except ValidationError as e:
-        logger.error(f"Validation error: {e}")
-        return jsonify({'error': str(e)}), 400
+        paginated = paginate_query(Policy, filters=filters, page=page, per_page=per_page)
 
-    existing = Policy.query.filter_by(name=dto.name).first()
-    if existing:
-        return jsonify({"error": "Policy with this name already exists."}), 400
+        results = [to_out(policy) for policy in paginated.items]
+        return paginate_to_dict(paginated, results), 200
 
-    policy = Policy(name=dto.name)
-    db.session.add(policy)
+    @ns.expect(InSchema) # an example of request body with expect model
+    def post(self):
+        """Create a new policy."""
+        try:
+            policy_data = PolicyIn.model_validate(request.json)
+            new_policy = Policy(**policy_data)  # Assuming firewall_id is available
+            db.session.add(new_policy)
+            if not safe_commit(db.session):
+                return jsonify({"error": "Failed to create policy"}), 500
+            return jsonify(to_out(new_policy)), 201
 
-    if not safe_commit(db.session):
-        logger.error("Failed to create policy")
-        return jsonify({'error': 'Failed to create policy'}), 500
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return jsonify({"error": e.errors()}), 400
 
-    return jsonify({'id': policy.id, 'name': policy.name}), 201
+@ns.route('/<int:policy_id>')
+class PolicyDetail(Resource):
+    """Manage a specific policy.
 
-@swag_from('/app/swagger/policy/delete.yaml', methods=['delete'])
-@bp.route('/<int:policy_id>', methods=['DELETE'])
-def delete_policy(policy_id: int) -> tuple:
-    """Delete a policy by ID.
     Args:
-        policy_id (int): The ID of the policy to delete.
-    Returns:
-        tuple: A tuple containing the HTTP status code.
+        Resource (flask_restx.Resource): The base resource class.
     """
-    policy = Policy.query.get_or_404(policy_id)
-    db.session.delete(policy)
+    @ns.doc(responses={200: 'Success', 404: 'Policy not found'})
+    @ns.param('policy_id', 'The policy ID', type='integer')
+    def get(self, policy_id):
+        """Get a policy by ID.
 
-    if not safe_commit(db.session):
-        return jsonify({'error': 'Failed to delete policy'}), 500
+        Args:
+            policy_id (int): The ID of the policy.
 
-    return "", 204
+        Returns:
+            dict: The policy data or an error message.
+        """
+        policy = Policy.query.get(policy_id)
+        if not policy:
+            return {"error": "Policy not found"}, 404
+        return to_out(policy), 200
+
+
+    def delete(self, policy_id):
+        """delete a policy by ID.
+
+        Args:
+            policy_id (int): The ID of the policy.
+
+        Returns:
+            dict: The policy data or an error message.
+        """
+        policy = Policy.query.get(policy_id)
+        if not policy:
+            return {"error": "Policy not found"}, 404
+        db.session.delete(policy)
+        if not safe_commit(db.session):
+            return {"error": "Failed to delete policy"}, 500
+        return {"message": "Policy deleted"}, 204
