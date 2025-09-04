@@ -41,13 +41,14 @@ services:
       CELERY_RESULT_BACKEND: "${REDIS_URL:-redis://redis:6379}/1"
       EXTERNAL_API_URL: "${EXTERNAL_API_URL}"
       EXTERNAL_API_TOKEN: "${EXTERNAL_API_TOKEN}"
-    command: celery -A app.celery_app:celery worker -l info -Q default
+    command: celery -A app.celery_worker:celery worker -l info -Q default
 
   flower:
     image: mher/flower:latest
     depends_on: [redis, worker]
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     ports:
       - "5555:5555"
-    environment:
-      REDIS_URL: "${REDIS_URL:-redis://redis:6379}"
     command: ["celery", "flower", "--broker=${REDIS_URL:-redis://redis:6379}/0", "--port=5555"]
