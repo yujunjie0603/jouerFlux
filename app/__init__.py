@@ -1,15 +1,14 @@
 """This module initializes the Flask application and its extensions."""
 from flask import Flask, redirect
-from flask_sqlalchemy import SQLAlchemy
-from flasgger import Swagger
-from flasgger.utils import swag_from
 from flask_cors import CORS
 from app.extensions import db, migrate, api
 from app.config import Config
+import app.celery_app as celery_app
 from .routes import firewalls, policies, rules, firewall_policy
 
 def create_app():
     """Create and configure the Flask application."""
+    
     app = Flask(__name__)
     app.config.from_object(Config)
 
@@ -23,7 +22,7 @@ def create_app():
     api.add_namespace(rules.ns, path='/rules')
     api.add_namespace(firewall_policy.ns, path='/firewall_policys')
     app.url_map.strict_slashes = False
-
+    celery_app.make_celery(app)
 
     # Redirect root URL to Swagger UI
     @app.route('/')

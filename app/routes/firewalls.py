@@ -9,6 +9,9 @@ from app.models import Firewall
 from app.extensions import db
 import app.utils.common as common_utils
 import app.schemas.firewall as firewall_schema
+from app.celery_app import celery
+import app.tasks.task_api_extrablog as celery_api_extrablog
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,6 +50,15 @@ class FirewallList(Resource):
 
         paginated = common_utils.paginate_query(Firewall, filters=filters, page=page, per_page=per_page)
         results = [to_out(row) for row in paginated.items]
+        # Test celery task with send task
+        val_celery = celery.send_task('app.celery_app.send_message_firewall', args=[2])
+        print("==========val_celery===========")
+        print(val_celery)
+
+        # Test celery task with delay
+        val_celery_2 = celery_api_extrablog.task_api_extrablog.delay(2, 3)
+        print("==========val_celery_2===========")
+        print(val_celery_2)
         return {
             'total': paginated.total,
             'pages': paginated.pages,
