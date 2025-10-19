@@ -66,4 +66,16 @@ def safe_commit(session):
 def test_function():
     """A simple test function to verify the utility module is working."""
     logger.info("Utility module is working correctly.")
+    def is_valid_ip(ip_str):
+        """Check if the provided string is a valid IP address.
+
+        Args:
+            ip_str (str): The IP address string to validate.
+        """
+        try:
+            ipaddress.ip_address(ip_str)
+            return True
+        except ValueError:
+            return False
+    return "Utility module is working correctly."
 
