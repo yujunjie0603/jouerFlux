@@ -62,3 +62,8 @@ def safe_commit(session):
         session.rollback()
         logger.error(f"Commit failed: {str(e)}")
         return False
+
+def test_function():
+    """A simple test function to verify the utility module is working."""
+    logger.info("Utility module is working correctly.")
+

@@ -19,11 +19,13 @@ def create_app():
     CORS(app)
 
     from .routes import firewalls, policies, rules, firewall_policy
+    from .commands import seed_data
     app.register_blueprint(firewalls.bp)
     app.register_blueprint(policies.bp)
     app.register_blueprint(rules.bp)
     app.register_blueprint(firewall_policy.bp)
-
+    app.cli.add_command(seed_data.seed_command)
+    
     with app.app_context():
         db.create_all()
 
