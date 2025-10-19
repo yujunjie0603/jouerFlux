@@ -64,7 +64,11 @@ def safe_commit(session):
         return False
 
 def test_function():
-    """A simple test function to verify the utility module is working."""
+    """
+    A simple test function to verify the utility module is working.
+    Returns:
+        bool: True if the function runs without error.
+    """
     logger.info("Utility module is working correctly.")
     def is_valid_ip(ip_str):
         """Check if the provided string is a valid IP address.
